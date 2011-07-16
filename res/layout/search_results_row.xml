@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+  
+  <TextView android:id="@+id/search_result_row_book"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentLeft="true"
+    android:textStyle="bold"
+    android:text="Song of Solomon" />
+    
+  <TextView android:id="@+id/search_result_row_book_chapter_separater"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_toRightOf="@id/search_result_row_book"
+    android:textStyle="bold"
+    android:text=" - " />
+    
+  <TextView android:id="@+id/search_result_row_chapter"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_toRightOf="@id/search_result_row_book_chapter_separater"
+    android:textStyle="bold"
+    android:text="Chapter 1" />
+    
+  <TextView android:id="@+id/search_result_row_verse_number"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/search_result_row_book"
+    android:layout_alignParentLeft="true"
+    android:text="[1]" />
+    
+  <TextView android:id="@+id/search_result_row_verse_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/search_result_row_book"
+    android:layout_toRightOf="@id/search_result_row_verse_number"
+    android:paddingLeft="5dip"
+    android:text="..." />
+    
+</RelativeLayout>

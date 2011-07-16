@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+  
+  <EditText android:id="@+id/search_term"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10sp"
+    android:hint="Search term" />
+   
+   <Spinner android:id="@+id/search_method"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/search_term" />
+    
+  <Spinner android:id="@+id/search_scope"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/search_method" />
+  
+  <Button android:id="@+id/submit_search"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="Search"
+    android:layout_alignParentBottom="true"
+    android:layout_gravity="bottom" />
+  
+  <ListView android:id="@+id/search_selected_books_list"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_above="@id/submit_search"
+    android:layout_below="@id/search_scope" />
+  
+</RelativeLayout>
