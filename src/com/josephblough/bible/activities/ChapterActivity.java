@@ -13,6 +13,7 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -26,6 +27,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -244,6 +246,9 @@ public class ChapterActivity extends ListActivity implements OnItemLongClickList
 	case R.id.load_bookmarks_menu_item:
 	    loadBookmark();
 	    break;
+	case R.id.change_font_menu_item:
+	    changeFont();
+	    break;
 	case R.id.select_chapter_menu_item:
 	    selectChapter();
 	    break;
@@ -257,41 +262,100 @@ public class ChapterActivity extends ListActivity implements OnItemLongClickList
 	final List<Integer> bookmarkListing = bookmarks.bookmarks;
 
 	final String[] bookmarkStrings = new String[bookmarkListing.size()];
-	for (int i=0; i<bookmarkListing.size(); i++) {
-	    Verse bookmarkedVerse = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(i));
-	    final Book book = BibleLibrary.getBook(getContentResolver(), bookmarkedVerse.bookId);
-	    bookmarkStrings[i] = book.name + " Chapter " + bookmarkedVerse.chapter + " Verse " + bookmarkedVerse.number;
+	if (bookmarkListing.size() == 0) {
+	    Toast.makeText(this, "No bookmarks have been saved", Toast.LENGTH_LONG).show();
 	}
+	else {
+	    for (int i=0; i<bookmarkListing.size(); i++) {
+		Verse bookmarkedVerse = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(i));
+		final Book book = BibleLibrary.getBook(getContentResolver(), bookmarkedVerse.bookId);
+		bookmarkStrings[i] = book.name + " Chapter " + bookmarkedVerse.chapter + " Verse " + bookmarkedVerse.number;
+	    }
+
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Load Bookmark");
+	    builder.setSingleChoiceItems(bookmarkStrings, -1, new DialogInterface.OnClickListener() {
+
+		public void onClick(DialogInterface dialog, int which) {
+		    Verse selectedBookmark = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(which));
+		    final Book book = BibleLibrary.getBook(getContentResolver(), selectedBookmark.bookId);
+
+		    Intent intent = new Intent(ChapterActivity.this, ChapterActivity.class);
+		    intent.putExtra(ChapterActivity.TITLE, book.name);
+		    intent.putExtra(ChapterActivity.BOOK_ID, book.id);
+		    intent.putExtra(ChapterActivity.CHAPTER, selectedBookmark.chapter);
+		    intent.putExtra(ChapterActivity.VERSE, selectedBookmark.number);
+		    startActivity(intent);
+
+		    dialog.cancel();
+		}
+	    });
+
+	    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+		    // Canceled.
+		    dialog.cancel();
+		}
+	    });
+
+	    builder.show();
+	}
+    }
+
+    public void changeFont() {
+	
+	final float MIN_FONT_SIZE = 14;
+	final float MAX_FONT_SIZE = 26;
+	final VerseAdapter adapter = (VerseAdapter)getListAdapter();
+	final float originalFontSize = adapter.getFontSize();
 	
 	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	builder.setTitle("Load Bookmark");
-	builder.setSingleChoiceItems(bookmarkStrings, -1, new DialogInterface.OnClickListener() {
+	builder.setTitle("Change Font Size");
+	View view = getLayoutInflater().inflate(R.layout.change_font, null);
+	final SeekBar sizerBar = (SeekBar) view.findViewById(R.id.change_font_seekbar);
+	sizerBar.setMax((int)(MAX_FONT_SIZE - MIN_FONT_SIZE));
+	sizerBar.setProgress((int)(originalFontSize - MIN_FONT_SIZE));
+	sizerBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+	    
+	    public void onStopTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+		
+	    }
+	    
+	    public void onStartTrackingTouch(SeekBar seekBar) {
+		// TODO Auto-generated method stub
+		
+	    }
+	    
+	    public void onProgressChanged(SeekBar seekBar, int progress,
+		    boolean fromUser) {
+		adapter.setFontSize(progress + MIN_FONT_SIZE);
+		adapter.notifyDataSetChanged();
+	    }
+	});
+	builder.setView(view);
+	builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 	    
 	    public void onClick(DialogInterface dialog, int which) {
-		Verse selectedBookmark = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(which));
-		final Book book = BibleLibrary.getBook(getContentResolver(), selectedBookmark.bookId);
-		
-		Intent intent = new Intent(ChapterActivity.this, ChapterActivity.class);
-		intent.putExtra(ChapterActivity.TITLE, book.name);
-		intent.putExtra(ChapterActivity.BOOK_ID, book.id);
-		intent.putExtra(ChapterActivity.CHAPTER, selectedBookmark.chapter);
-		intent.putExtra(ChapterActivity.VERSE, selectedBookmark.number);
-		startActivity(intent);
-
-		dialog.cancel();
+		// Save the new preference
+		SharedPreferences prefs = ChapterActivity.this.getSharedPreferences("VerseAdapter", 0);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putFloat(VerseAdapter.FONT_PREFERENCE, sizerBar.getProgress() + MIN_FONT_SIZE);
+		editor.commit();
 	    }
 	});
 	
 	builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	    public void onClick(DialogInterface dialog, int whichButton) {
-		// Canceled.
-		dialog.cancel();
+	    
+	    public void onClick(DialogInterface dialog, int which) {
+		adapter.setFontSize(originalFontSize);
+		adapter.notifyDataSetChanged();
 	    }
 	});
 	
 	builder.show();
     }
-
+    
     public void selectChapter() {
 	final Book book = BibleLibrary.getBook(getContentResolver(), this.bookId);
 	int count = BibleLibrary.getChapterCount(getContentResolver(), book);

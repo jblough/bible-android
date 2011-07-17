@@ -22,6 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 
@@ -167,40 +168,45 @@ public class Bible extends ListActivity implements OnItemClickListener {
 	bookmarks.loadBookmarks();
 	final List<Integer> bookmarkListing = bookmarks.bookmarks;
 
-	final String[] bookmarkStrings = new String[bookmarkListing.size()];
-	for (int i=0; i<bookmarkListing.size(); i++) {
-	    Verse bookmarkedVerse = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(i));
-	    Book book = findBook(bookmarkedVerse.bookId);
-	    bookmarkStrings[i] = book.name + " Chapter " + bookmarkedVerse.chapter + " Verse " + bookmarkedVerse.number;
+	if (bookmarkListing.size() == 0) {
+		Toast.makeText(this, "No bookmarks have been saved", Toast.LENGTH_LONG).show();
 	}
-	
-	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	builder.setTitle("Load Bookmark");
-	builder.setSingleChoiceItems(bookmarkStrings, -1, new DialogInterface.OnClickListener() {
-	    
-	    public void onClick(DialogInterface dialog, int which) {
-		Verse selectedBookmark = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(which));
-		Book book = findBook(selectedBookmark.bookId);
-		
-		Intent intent = new Intent(Bible.this, ChapterActivity.class);
-		intent.putExtra(ChapterActivity.TITLE, book.name);
-		intent.putExtra(ChapterActivity.BOOK_ID, book.id);
-		intent.putExtra(ChapterActivity.CHAPTER, selectedBookmark.chapter);
-		intent.putExtra(ChapterActivity.VERSE, selectedBookmark.number);
-		startActivity(intent);
+	else {
+	    final String[] bookmarkStrings = new String[bookmarkListing.size()];
+	    for (int i=0; i<bookmarkListing.size(); i++) {
+		Verse bookmarkedVerse = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(i));
+		Book book = findBook(bookmarkedVerse.bookId);
+		bookmarkStrings[i] = book.name + " Chapter " + bookmarkedVerse.chapter + " Verse " + bookmarkedVerse.number;
+	    }
 
-		dialog.cancel();
-	    }
-	});
-	
-	builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	    public void onClick(DialogInterface dialog, int whichButton) {
-		// Canceled.
-		dialog.cancel();
-	    }
-	});
-	
-	builder.show();
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Load Bookmark");
+	    builder.setSingleChoiceItems(bookmarkStrings, -1, new DialogInterface.OnClickListener() {
+
+		public void onClick(DialogInterface dialog, int which) {
+		    Verse selectedBookmark = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(which));
+		    Book book = findBook(selectedBookmark.bookId);
+
+		    Intent intent = new Intent(Bible.this, ChapterActivity.class);
+		    intent.putExtra(ChapterActivity.TITLE, book.name);
+		    intent.putExtra(ChapterActivity.BOOK_ID, book.id);
+		    intent.putExtra(ChapterActivity.CHAPTER, selectedBookmark.chapter);
+		    intent.putExtra(ChapterActivity.VERSE, selectedBookmark.number);
+		    startActivity(intent);
+
+		    dialog.cancel();
+		}
+	    });
+
+	    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+		    // Canceled.
+		    dialog.cancel();
+		}
+	    });
+
+	    builder.show();
+	}
     }
     
     private void removeBookmarks() {
@@ -209,46 +215,51 @@ public class Bible extends ListActivity implements OnItemClickListener {
 	final List<Integer> bookmarkListing = bookmarks.bookmarks;
 
 	final String[] bookmarkStrings = new String[bookmarkListing.size()];
-	for (int i=0; i<bookmarkListing.size(); i++) {
-	    Verse bookmarkedVerse = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(i));
-	    Book book = findBook(bookmarkedVerse.bookId);
-	    bookmarkStrings[i] = book.name + " Chapter " + bookmarkedVerse.chapter + " Verse " + bookmarkedVerse.number;
+	if (bookmarkListing.size() == 0) {
+	    Toast.makeText(this, "No bookmarks have been saved", Toast.LENGTH_LONG).show();
 	}
-	
-	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	builder.setTitle("Remove Bookmarks");
-	final HashSet<Integer> bookmarksToDelete = new HashSet<Integer>();
-	builder.setMultiChoiceItems(bookmarkStrings, null, new DialogInterface.OnMultiChoiceClickListener() {
-		
-	    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-		if (isChecked)
-		    bookmarksToDelete.add(bookmarkListing.get(which));
-		else
-		    bookmarksToDelete.remove(bookmarkListing.get(which));
+	else {
+	    for (int i=0; i<bookmarkListing.size(); i++) {
+		Verse bookmarkedVerse = BibleLibrary.getVerse(getContentResolver(), bookmarkListing.get(i));
+		Book book = findBook(bookmarkedVerse.bookId);
+		bookmarkStrings[i] = book.name + " Chapter " + bookmarkedVerse.chapter + " Verse " + bookmarkedVerse.number;
 	    }
-	});
-	
-	builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-	    
-	    public void onClick(DialogInterface dialog, int which) {
-		// Delete the bookmarks
-		for (final Integer bookmark : bookmarksToDelete) {
-		    bookmarks.removeBookmark(bookmark);
+
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Remove Bookmarks");
+	    final HashSet<Integer> bookmarksToDelete = new HashSet<Integer>();
+	    builder.setMultiChoiceItems(bookmarkStrings, null, new DialogInterface.OnMultiChoiceClickListener() {
+
+		public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+		    if (isChecked)
+			bookmarksToDelete.add(bookmarkListing.get(which));
+		    else
+			bookmarksToDelete.remove(bookmarkListing.get(which));
 		}
-		
-		// Dismiss the dialog
-		dialog.dismiss();
-	    }
-	});
-	
-	builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	    public void onClick(DialogInterface dialog, int whichButton) {
-		// Canceled.
-		dialog.cancel();
-	    }
-	});
-	
-	builder.show();
+	    });
+
+	    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+		public void onClick(DialogInterface dialog, int which) {
+		    // Delete the bookmarks
+		    for (final Integer bookmark : bookmarksToDelete) {
+			bookmarks.removeBookmark(bookmark);
+		    }
+
+		    // Dismiss the dialog
+		    dialog.dismiss();
+		}
+	    });
+
+	    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int whichButton) {
+		    // Canceled.
+		    dialog.cancel();
+		}
+	    });
+
+	    builder.show();
+	}
     }
     
     private Book findBook(final int bookId) {

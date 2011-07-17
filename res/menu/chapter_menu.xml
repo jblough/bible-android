@@ -6,6 +6,10 @@
     android:title="Load Bookmark"
     android:icon="@drawable/ic_menu_archive" />
 
+  <item android:id="@+id/change_font_menu_item"
+    android:title="Change Font"
+    android:icon="@drawable/ic_menu_preferences" />
+
   <item android:id="@+id/select_chapter_menu_item"
     android:title="Select Chapter"
     android:icon="@drawable/listing3" />
